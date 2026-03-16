@@ -1,6 +1,12 @@
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_LOGIN")
 
+-- Helper: emulates string.match for a single capture (compatible with older WoW Lua)
+local function strmatch(s, pattern)
+    local _, _, capture = string.find(s, pattern)
+    return capture
+end
+
 -- Get highest rank from spellbook
 local function GetHighestRank(spellBase)
     local i = 1
@@ -13,7 +19,7 @@ local function GetHighestRank(spellBase)
         local baseName = string.gsub(spellName, " %(Rank %d+%)", "")
         local rankNum = 0
         if spellRank and type(spellRank) == "string" then
-            local found = string.match(spellRank, "(%d+)")
+            local found = strmatch(spellRank, "(%d+)")
             if found then rankNum = tonumber(found) end
         end
 
@@ -61,14 +67,14 @@ local function CheckOutdatedSpells()
 
             if spellName and type(spellName) == "string" then
                 -- Check rank embedded in spell name (e.g., "Fireball (Rank 4)")
-                local embedded = string.match(spellName, "%(Rank (%d+)%)")
+                local embedded = strmatch(spellName, "%(Rank (%d+)%)")
                 if embedded then
                     currentRank = tonumber(embedded)
                 else
                     -- Otherwise, search all tooltip lines for "Rank X"
                     for _, line in ipairs(lines) do
                         if type(line) == "string" and string.find(line, "Rank") then
-                            local found = string.match(line, "(%d+)")
+                            local found = strmatch(line, "(%d+)")
                             if found then
                                 currentRank = tonumber(found)
                                 break
